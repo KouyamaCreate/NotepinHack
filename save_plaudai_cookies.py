@@ -1,11 +1,20 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import os
+from dotenv import load_dotenv
 import pickle
 import time
 
 # Chromeのオプション設定（必要に応じて変更）
+load_dotenv()
 options = Options()
 # options.add_argument("--headless")  # GUIで操作するためコメントアウト
+chrome_user_data_dir = os.environ.get("CHROME_USER_DATA_DIR")
+chrome_profile_directory = os.environ.get("CHROME_PROFILE_DIRECTORY")
+if chrome_user_data_dir:
+    options.add_argument(f'--user-data-dir={chrome_user_data_dir}')
+if chrome_profile_directory:
+    options.add_argument(f'--profile-directory={chrome_profile_directory}')
 
 # WebDriverのパスが必要な場合は明示的に指定
 # driver = webdriver.Chrome(executable_path='chromedriverのパス', options=options)

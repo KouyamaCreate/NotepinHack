@@ -24,17 +24,17 @@ def main():
     html_save_path = "plaudai_dashboard.html"
 
     load_dotenv()
-    CHROME_USER_DATA_DIR = os.getenv("CHROME_USER_DATA_DIR")
-    CHROME_PROFILE_DIRECTORY = os.getenv("CHROME_PROFILE_DIRECTORY")
 
     options = Options()
     # options.add_argument('--headless')  # headlessではcookie認証に失敗する場合があるためOFF
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    if CHROME_USER_DATA_DIR:
-        options.add_argument(f'--user-data-dir={CHROME_USER_DATA_DIR}')
-    if CHROME_PROFILE_DIRECTORY:
-        options.add_argument(f'--profile-directory={CHROME_PROFILE_DIRECTORY}')
+    chrome_user_data_dir = os.environ.get("CHROME_USER_DATA_DIR")
+    chrome_profile_directory = os.environ.get("CHROME_PROFILE_DIRECTORY")
+    if chrome_user_data_dir:
+        options.add_argument(f'--user-data-dir={chrome_user_data_dir}')
+    if chrome_profile_directory:
+        options.add_argument(f'--profile-directory={chrome_profile_directory}')
     options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(options=options)
 

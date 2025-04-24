@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import pickle
 import time
 import requests
@@ -46,12 +47,17 @@ def download_file(url, save_path):
         return False
 
 def main():
+    load_dotenv()
     options = Options()
     # options.add_argument('--headless') # デバッグ時はGUI表示推奨
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    options.add_argument('--user-data-dir=/Users/koseiyamamoto/Library/Application Support/Google/Chrome')
-    options.add_argument('--profile-directory=Default')
+    chrome_user_data_dir = os.environ.get("CHROME_USER_DATA_DIR")
+    chrome_profile_directory = os.environ.get("CHROME_PROFILE_DIRECTORY")
+    if chrome_user_data_dir:
+        options.add_argument(f'--user-data-dir={chrome_user_data_dir}')
+    if chrome_profile_directory:
+        options.add_argument(f'--profile-directory={chrome_profile_directory}')
     options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(options=options)
 
