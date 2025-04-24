@@ -5,6 +5,14 @@ import datetime
 import re
 import time
 
+# --- Artifacts用ディレクトリを空でも作成しておく ---
+for d in ["transcript", "summary"]:
+    os.makedirs(d, exist_ok=True)
+    keepfile = os.path.join(d, ".keep")
+    if not os.path.exists(keepfile):
+        open(keepfile, "w").close()
+# -----------------------------------------------
+
 # --- 設定 ---
 LOGIN_URL = "https://app.plaud.ai/"
 RECORD_LIST_API_URL = "https://api.plaud.ai/file/simple/web?skip=0&limit=99999&is_trash=2&sort_by=start_time&is_desc=true"
