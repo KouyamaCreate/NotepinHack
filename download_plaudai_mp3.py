@@ -21,7 +21,7 @@ def sanitize_filename(filename):
 def download_file(url, save_path):
     """指定されたURLからファイルをダウンロードして保存する"""
     try:
-        response = requests.get(url, stream=True)
+        response = requests.get(url, stream=True, timeout=1800)
         response.raise_for_status()  # HTTPエラーがあれば例外を発生させる
         with open(save_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
@@ -61,7 +61,7 @@ def main():
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
     }
     try:
-        response = requests.get(RECORD_LIST_API_URL, headers=headers)
+        response = requests.get(RECORD_LIST_API_URL, headers=headers, timeout=1800)
         response.raise_for_status()
         record_data = response.json()
 
@@ -129,7 +129,7 @@ def main():
         # ダウンロードURL取得APIを呼び出す
         download_api_url = DOWNLOAD_URL_API_BASE + record_id
         try:
-            dl_response = requests.get(download_api_url, headers=headers)
+            dl_response = requests.get(download_api_url, headers=headers, timeout=1800)
             dl_response.raise_for_status()
             dl_data = dl_response.json()
 

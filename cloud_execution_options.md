@@ -87,7 +87,80 @@
 
 ---
 
-## 結論
+## プライベートリポジトリで必要なファイルだけを同期しながら安全に自動実行する方法
 
-GitHub Actionsによる定期実行＋Artifacts保存が、無料・簡単・確実な手段です。  
-外部ストレージ連携も容易に追加できます。
+### 1. 必要なファイルだけ同期する方針
+
+- download_plaudai_mp3.py
+- requirements.txt（必要な場合）
+
+### 2. アップストリームから必要なファイルのみ自動取得するワークフロー例
+
+`.github/workflows/sync_selected_files.yml` を作成し、以下のようにすることで、元リポジトリの`download_plaudai_mp3.py`および`requirements.txt`のみを定期的に取得・上書きできます。
+
+```yaml
+name: Sync selected files from upstream
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 毎日午前3時（JST12時）に実行
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout self
+        uses: actions/checkout@v3
+
+      - name: Fetch selected files from upstream
+        run: |
+          git clone --depth=1 https://github.com/original-owner/original-repo.git upstream-tmp
+          cp upstream-tmp/download_plaudai_mp3.py ./download_plaudai_mp3.py
+          if [ -f upstream-tmp/requirements.txt ]; then cp upstream-tmp/requirements.txt ./requirements.txt; fi
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add download_plaudai_mp3.py requirements.txt || true
+          git diff --cached --quiet || git commit -m "Sync selected files from upstream"
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### ポイント
+- git cloneで一時ディレクトリにupstreamを取得し、必要なファイルのみを上書き
+- ファイルが変更されていればcommitしてpush
+- 不要なファイルや競合の心配がない
+
+---
+
+## 補足：他者の公開Gitリポジトリを個人・社内用に完全コピー（Fork）したい場合
+
+### 結論（最もシンプルな方法）
+
+**branchも含めて完全コピーしたい場合は、`--mirror`オプション付きでclone→pushするだけでOK**
+
+```sh
+git clone --mirror https://github.com/${user-or-org}/${repo-fork-from}.git
+git push  --mirror https://github.com/${user-or-org}/${repo-fork-to}.git
+```
+
+- これで全てのブランチやタグ、refsも含めて丸ごとコピーされる
+- Fork先をプライベートにすれば、個人利用や社内限定利用が可能
+
+### 注意点
+
+- Fork先リポジトリのGitHub Actionsは、Settingsから必ず無効化しておく  
+  （Fork元のワークフローファイルが自動で起動してしまう場合があるため）
+
+### 参考
+
+- 通常のGitHubの「Fork」機能はmainブランチのみ・PR履歴付きのコピー
+- `--mirror`は全てのブランチ・タグ・refsを完全複製したい場合に推奨
+
+---
+
+この手順により、ブランチ構成や履歴を含めて安全にプライベートリポジトリへコピーし、必要なファイルだけを残して同期・自動実行の運用が可能です。
