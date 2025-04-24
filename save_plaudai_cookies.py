@@ -33,4 +33,16 @@ with open("plaudai_cookies.pkl", "wb") as f:
 
 print("Cookieをplaudai_cookies.pklに保存しました。")
 
+# localStorageからtokenstrを取得して保存
+try:
+    tokenstr = driver.execute_script("return localStorage.getItem('tokenstr');")
+    if tokenstr:
+        with open("plaudai_tokenstr.txt", "w", encoding="utf-8") as f:
+            f.write(tokenstr)
+        print("tokenstrをplaudai_tokenstr.txtに保存しました。")
+    else:
+        print("localStorageからtokenstrが取得できませんでした。")
+except Exception as e:
+    print(f"tokenstr取得時にエラー: {e}")
+
 driver.quit()
