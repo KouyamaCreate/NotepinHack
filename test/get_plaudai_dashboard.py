@@ -5,12 +5,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pickle
 import time
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+CHROME_USER_DATA_DIR = os.getenv("CHROME_USER_DATA_DIR")
+CHROME_PROFILE_DIRECTORY = os.getenv("CHROME_PROFILE_DIRECTORY")
 
 # Chromeのオプション設定
 options = Options()
 # options.add_argument("--headless") # デバッグのためGUI表示推奨
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
+if CHROME_USER_DATA_DIR:
+    options.add_argument(f'--user-data-dir={CHROME_USER_DATA_DIR}')
+if CHROME_PROFILE_DIRECTORY:
+    options.add_argument(f'--profile-directory={CHROME_PROFILE_DIRECTORY}')
+options.add_argument("--disable-blink-features=AutomationControlled")
 
 # WebDriverの初期化
 driver = webdriver.Chrome(options=options)

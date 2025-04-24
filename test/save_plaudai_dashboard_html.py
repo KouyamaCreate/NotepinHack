@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import time
+import os
+from dotenv import load_dotenv
 
 # ChromeプロファイルやCookie経由でログイン状態を復元する
 def load_cookies(driver, cookie_path):
@@ -21,10 +23,19 @@ def main():
     cookie_path = "plaudai_cookies.pkl"
     html_save_path = "plaudai_dashboard.html"
 
+    load_dotenv()
+    CHROME_USER_DATA_DIR = os.getenv("CHROME_USER_DATA_DIR")
+    CHROME_PROFILE_DIRECTORY = os.getenv("CHROME_PROFILE_DIRECTORY")
+
     options = Options()
     # options.add_argument('--headless')  # headlessではcookie認証に失敗する場合があるためOFF
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
+    if CHROME_USER_DATA_DIR:
+        options.add_argument(f'--user-data-dir={CHROME_USER_DATA_DIR}')
+    if CHROME_PROFILE_DIRECTORY:
+        options.add_argument(f'--profile-directory={CHROME_PROFILE_DIRECTORY}')
+    options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(options=options)
 
     driver.get(url)

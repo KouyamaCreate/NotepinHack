@@ -50,14 +50,23 @@ def main():
     # options.add_argument('--headless') # デバッグ時はGUI表示推奨
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
+    options.add_argument('--user-data-dir=/Users/koseiyamamoto/Library/Application Support/Google/Chrome')
+    options.add_argument('--profile-directory=Default')
+    options.add_argument("--disable-blink-features=AutomationControlled")
     driver = webdriver.Chrome(options=options)
 
     auth_token = None
     try:
         driver.get(LOGIN_URL)
         print("Plaud Webを開きました。")
-        print("Googleアカウントでログインし、ダッシュボードが表示されるまで手動で操作してください。")
-        input("ログインが完了し、ダッシュボードが表示されたらEnterキーを押してください...")
+        # --- テスト用: 手動ログインを許可する関数 ---
+        def wait_for_manual_login():
+            print("Googleアカウントでログインし、ダッシュボードが表示されるまで手動で操作してください。")
+            input("ログインが完了し、ダッシュボードが表示されたらEnterキーを押してください...")
+
+        # 通常は手動待ちをスキップしてそのまま進む
+        # テスト時は以下の関数を呼び出してください
+        # wait_for_manual_login()
 
         # Local Storageから認証トークンを取得
         print("認証トークンを取得中...")
