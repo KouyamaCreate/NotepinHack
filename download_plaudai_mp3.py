@@ -1,39 +1,28 @@
 import os
 from dotenv import load_dotenv
-import pickle
-import time
 import requests
 import datetime
 import re
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# from selenium.common.exceptions import NoSuchElementException, TimeoutException
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
+import time
 
 # --- 設定 ---
 LOGIN_URL = "https://app.plaud.ai/"
 RECORD_LIST_API_URL = "https://api.plaud.ai/file/simple/web?skip=0&limit=99999&is_trash=2&sort_by=start_time&is_desc=true"
 DOWNLOAD_URL_API_BASE = "https://api.plaud.ai/file/temp-url/"
-DOWNLOAD_DIR = "plaud_downloads" # ダウンロード先ディレクトリ名
+DOWNLOAD_DIR = "plaud_downloads"  # ダウンロード先ディレクトリ名
 # -------------
 
 def sanitize_filename(filename):
     """ファイル名として無効な文字を除去または置換する"""
     # WindowsとmacOS/Linuxで一般的に無効な文字を除去
     sanitized = re.sub(r'[\\/*?:"<>|]', '_', filename)
-    # 長すぎるファイル名を切り詰める（オプション）
-    # max_len = 200
-    # if len(sanitized) > max_len:
-    #     name, ext = os.path.splitext(sanitized)
-    #     sanitized = name[:max_len - len(ext)] + ext
     return sanitized
 
 def download_file(url, save_path):
     """指定されたURLからファイルをダウンロードして保存する"""
     try:
         response = requests.get(url, stream=True)
-        response.raise_for_status() # HTTPエラーがあれば例外を発生させる
+        response.raise_for_status()  # HTTPエラーがあれば例外を発生させる
         with open(save_path, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -62,14 +51,14 @@ def main():
         print("ログイン状態を確認し、再度cookie/tokenを取得してください。")
         return
 
-    auth_token = token_str # "bearer <トークン>" の形式
+    auth_token = token_str  # "bearer <トークン>" の形式
     print("認証トークンをファイルから取得しました。")
 
     # --- 録音リストを取得 ---
     print("\n録音リストを取得中...")
     headers = {
         "Authorization": auth_token,
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36" # User-Agentは適宜調整
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
     }
     try:
         response = requests.get(RECORD_LIST_API_URL, headers=headers)
@@ -121,7 +110,7 @@ def main():
         os.makedirs(DOWNLOAD_DIR)
         print(f"ダウンロードディレクトリを作成しました: {DOWNLOAD_DIR}")
 
-    # --- MP3 (またはOpus) をダウンロード ---
+    # --- MP3 (またはOpus等) をダウンロード ---
     download_count = 0
     for record in today_records:
         record_id = record.get("id")
@@ -129,8 +118,8 @@ def main():
         # fullname から拡張子を取得 (例: .opus) なければ .mp3 を仮定
         fullname = record.get("fullname", "")
         _, ext = os.path.splitext(fullname)
-        if not ext or ext.lower() not in ['.mp3', '.opus', '.wav', '.m4a']: # 一般的な音声形式
-            ext = ".mp3" # デフォルトはmp3とする
+        if not ext or ext.lower() not in ['.mp3', '.opus', '.wav', '.m4a']:
+            ext = ".mp3"  # デフォルトはmp3とする
 
         sanitized_filename = sanitize_filename(filename_base) + ext
         save_path = os.path.join(DOWNLOAD_DIR, sanitized_filename)
@@ -164,7 +153,6 @@ def main():
             print(f"  予期せぬエラーが発生しました: {e}")
 
     print(f"\nダウンロード処理完了。{download_count} / {len(today_records)} 件のファイルをダウンロードしました。")
-
 
 if __name__ == "__main__":
     main()
